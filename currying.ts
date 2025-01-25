@@ -1,4 +1,3 @@
-/// <reference lib="ESNext" />
 import * as _ from "remeda";
 
 // Refactor updatePlayer
