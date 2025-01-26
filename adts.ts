@@ -42,3 +42,8 @@ const validatePasswordCharacters = (user: User) => {}; // alphanumeric
 const createRegisterRequestConfig = (user: User): AxiosRequestConfig => ({ }); // get the base url from the environment variables (procss.env.BASE_URL)
 
 const user = { name: "omer", age: 34, password: "Aa123456" };
+
+// Expected result:
+// Error message if user validation failed
+// or
+// Request config object to pass to axios
