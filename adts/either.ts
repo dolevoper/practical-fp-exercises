@@ -1,15 +1,37 @@
 type Func<T, U> = (p: T) => U;
 
-type Either<Left, Right> =
+export type Either<Left, Right> =
     | { _type: "left", value: Left }
     | { _type: "right", value: Right };
 
-export function left<T>(value: T): Either<T, unknown> {
+export function left<T>(value: T): Either<T, never> {
     return { _type: "left", value };
 }
 
-export function Right<T>(value: T): Either<unknown, T> {
+export function right<T>(value: T): Either<never, T> {
     return { _type: "right", value };
+}
+
+export function fork<Left, Right>(either: Either<Left, Right>, onLeft: Func<Left, void>, onRight: Func<Right, void>) {
+    if (either._type === "left") {
+        onLeft(either.value);
+    } else {
+        onRight(either.value);
+    }
+}
+
+export function unbox<Left, Right, Res>(onLeft: Func<Left, Res>, onRight: Func<Right, Res>): Func<Either<Left, Right>, Res>;
+export function unbox<Left, Right, Res>(either: Either<Left, Right>, onLeft: Func<Left, Res>, onRight: Func<Right, Res>): Res;
+export function unbox<Left, Right, Res>(eitherOrOnLeft: Either<Left, Right> | Func<Left, Res>, onLeftOrRight?: Func<Left, Res> | Func<Right, Res>, onRight?: Func<Right, Res>): Res | Func<Either<Left, Right>, Res> {
+    function execUnbox(either: Either<Left, Right>, onLeft: Func<Left, Res>, onRight: Func<Right, Res>) {
+        return either._type === "left"
+            ? onLeft(either.value)
+            : onRight(either.value);
+    }
+
+    return typeof eitherOrOnLeft !== "function"
+        ? execUnbox(eitherOrOnLeft, onLeftOrRight as Func<Left, Res>, onRight!)
+        : (either: Either<Left, Right>) => execUnbox(either, eitherOrOnLeft, onLeftOrRight as Func<Right, Res>);
 }
 
 export function map<Left, Right, NewRight>(projection: Func<Right, NewRight>): Func<Either<Left, Right>, Either<Left, NewRight>>;
